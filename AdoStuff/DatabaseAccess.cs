@@ -55,7 +55,11 @@ namespace AdoStuff
 				}
 			}
 		}
-
+		/// <summary>
+		/// Stored proc
+		/// </summary>
+		/// <param name="year"></param>
+		/// <returns></returns>
 		public async Task ReadDataUsingStoredProcedure(int year)
 		{
 			using (SqlConnection connection = new SqlConnection(_config))
