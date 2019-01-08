@@ -9,6 +9,12 @@ using System.Threading.Tasks;
 
 namespace AdoStuff
 {
+	//private methods are visible only within the same class
+	//internal methods are visible within the same assembly (project)
+	//protected methods are accessible from within the same class or from classes derived from the first class.
+	//virtual methods have code in them and can be overriden but DON'T HAVE TO BE (i.e. you can inherit the class and use the methods as they are)
+	//abstract methods just have the signature with no code in them so they MUST be overriden.
+
 	public class DatabaseAccess
 	{
 		private readonly ILogger<DatabaseAccess> _logger;
@@ -36,8 +42,8 @@ namespace AdoStuff
 				command.Parameters.Add("Start", SqlDbType.DateTime);
 				command.Parameters["Start"].Value = new DateTime(year, 1, 1);
 				command.Parameters.Add("End", SqlDbType.DateTime);
-				command.Parameters["End"].Value = new DateTime(year+1, 1, 1);
-				
+				command.Parameters["End"].Value = new DateTime(year + 1, 1, 1);
+
 				using (SqlDataReader reader = await command.ExecuteReaderAsync())
 				{
 					while (reader.Read())
@@ -49,6 +55,33 @@ namespace AdoStuff
 				}
 			}
 		}
+
+		public async Task ReadDataUsingStoredProcedure(int year)
+		{
+			using (SqlConnection connection = new SqlConnection(_config))
+			{
+				SqlCommand command = connection.CreateCommand();
+				command.CommandText = "[dbo].[GetParkrunsByYear]";
+				command.CommandType = CommandType.StoredProcedure;
+				SqlParameter p1 = command.CreateParameter();
+				p1.SqlDbType = SqlDbType.NVarChar;
+				p1.ParameterName = "@Year";
+				p1.Value = year;
+				command.Parameters.Add(p1);
+				connection.Open();
+
+				using (SqlDataReader reader = await command.ExecuteReaderAsync())
+				{
+					while (reader.Read())
+					{
+						var secs = int.Parse(reader["Seconds"].ToString()) < 10 ? "0" + reader["Seconds"] : reader["Seconds"];
+						_logger.LogInformation($"Race: {reader["Race"]}, Date: {reader["RaceDate"]}," +
+							$" Time: {reader["Minutes"]}:{secs}");
+					}
+				}
+			}
+		}
+
 
 		internal async Task GetBestRace()
 		{

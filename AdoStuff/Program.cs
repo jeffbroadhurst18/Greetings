@@ -24,9 +24,14 @@ namespace AdoStuff
 				Seconds = 13
 			};
 
-			await access.InsertRace(parkrun);
+		//	await access.InsertRace(parkrun);
 
 			await access.GetBestRace();
+
+			Console.WriteLine("Enter the year");
+			var year = Console.ReadLine();
+
+			await access.ReadDataUsingStoredProcedure(int.Parse(year));
 
 			Console.ReadLine();
 		}
